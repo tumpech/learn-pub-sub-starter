@@ -29,7 +29,7 @@ func main() {
 		rabbitmqChannel,
 		routing.ExchangePerilDirect,
 		routing.PauseKey,
-		routing.PlayingState{IsPaused: false},
+		routing.PlayingState{IsPaused: true},
 	)
 	if err != nil {
 		log.Fatalf("Couldn't publish JSON: %v", err)
