@@ -46,6 +46,20 @@ func main() {
 	}()
 
 	gamestate := gamelogic.NewGameState(username)
+
+	err = pubsub.SubscribeJSON(
+		rabbitmqConnection,
+		routing.ExchangePerilDirect,
+		queueName,
+		routing.PauseKey,
+		pubsub.TransientQueue,
+		handlerPause(gamestate),
+	)
+
+	if err != nil {
+		log.Fatalf("Error subscribing to queue: %v", err)
+	}
+
 	gamelogic.PrintClientHelp()
 	for {
 		input := gamelogic.GetInput()

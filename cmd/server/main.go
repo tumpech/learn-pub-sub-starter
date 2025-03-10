@@ -28,13 +28,18 @@ func main() {
 
 	log.Println("Starting Peril server...")
 
-	pubsub.DeclareAndBind(
+	_, queue, err := pubsub.DeclareAndBind(
 		rabbitmqConnection,
 		routing.ExchangePerilTopic,
 		routing.GameLogSlug,
-		"game_logs.*",
+		routing.GameLogSlug+".*",
 		pubsub.DurableQueue,
 	)
+
+	if err != nil {
+		log.Fatalf("could not subscribe to pause: %v", err)
+	}
+	log.Printf("Queue %v declared and bound!\n", queue.Name)
 
 	gamelogic.PrintServerHelp()
 
