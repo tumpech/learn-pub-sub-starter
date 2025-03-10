@@ -39,7 +39,51 @@ func main() {
 	fmt.Println("Starting Peril client...")
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-	sig := <-sigChan
-	log.Printf("Received signal %v. Exiting.\n", sig.String())
-	os.Exit(0)
+	go func() {
+		sig := <-sigChan
+		log.Printf("Received signal %v. Exiting.\n", sig.String())
+		os.Exit(0)
+	}()
+
+	gamestate := gamelogic.NewGameState(username)
+	gamelogic.PrintClientHelp()
+	for {
+		input := gamelogic.GetInput()
+		if len(input) == 0 {
+			continue
+		}
+		switch input[0] {
+		case "spawn":
+			err = gamestate.CommandSpawn(input)
+			if err != nil {
+				log.Printf("Error while executing command: %v", err)
+				continue
+			}
+			continue
+		case "move":
+			_, err := gamestate.CommandMove(input)
+			if err != nil {
+				log.Printf("Error while executing command: %v", err)
+				continue
+			}
+			log.Printf("Moved successfully.")
+			continue
+		case "status":
+			gamestate.CommandStatus()
+			continue
+		case "spam":
+			log.Printf("Spamming not allowed yet!")
+			continue
+		case "quit":
+			gamelogic.PrintQuit()
+			os.Exit(0)
+		case "help":
+			gamelogic.PrintServerHelp()
+			continue
+		default:
+			log.Printf("Unknown command: %s", input[0])
+			continue
+		}
+	}
+
 }
