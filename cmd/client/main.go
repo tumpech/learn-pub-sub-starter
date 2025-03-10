@@ -47,7 +47,7 @@ func main() {
 		routing.ExchangePerilDirect,
 		fmt.Sprintf("%s.%s", routing.PauseKey, username),
 		routing.PauseKey,
-		pubsub.TransientQueue,
+		pubsub.SimpleQueueTransient,
 		handlerPause(gamestate),
 	)
 
@@ -60,7 +60,7 @@ func main() {
 		routing.ExchangePerilTopic,
 		fmt.Sprintf("%s.%s", routing.ArmyMovesPrefix, username),
 		fmt.Sprintf("%s.*", routing.ArmyMovesPrefix),
-		pubsub.TransientQueue,
+		pubsub.SimpleQueueTransient,
 		handlerMove(gamestate),
 	)
 

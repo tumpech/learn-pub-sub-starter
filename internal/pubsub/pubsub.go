@@ -1,6 +1,16 @@
 package pubsub
 
+type Acktype int
+
+type SimpleQueueType int
+
 const (
-	DurableQueue   = iota // 0
-	TransientQueue        // 1
+	SimpleQueueDurable SimpleQueueType = iota
+	SimpleQueueTransient
+)
+
+const (
+	Ack Acktype = iota
+	NackDiscard
+	NackRequeue
 )

@@ -9,7 +9,7 @@ func DeclareAndBind(
 	exchange,
 	queueName,
 	key string,
-	simpleQueueType int, // an enum to represent "durable" or "transient"
+	simpleQueueType SimpleQueueType,
 ) (*amqp.Channel, amqp.Queue, error) {
 	rabbitmqChannel, err := conn.Channel()
 	if err != nil {
@@ -18,7 +18,7 @@ func DeclareAndBind(
 
 	var rabbitmqQueue amqp.Queue
 
-	if simpleQueueType == DurableQueue {
+	if simpleQueueType == SimpleQueueDurable {
 		rabbitmqQueue, err = rabbitmqChannel.QueueDeclare(
 			queueName,
 			true,
