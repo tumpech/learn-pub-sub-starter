@@ -28,6 +28,14 @@ func main() {
 
 	log.Println("Starting Peril server...")
 
+	pubsub.DeclareAndBind(
+		rabbitmqConnection,
+		routing.ExchangePerilTopic,
+		routing.GameLogSlug,
+		"game_logs.*",
+		pubsub.DurableQueue,
+	)
+
 	gamelogic.PrintServerHelp()
 
 	sigChan := make(chan os.Signal, 1)

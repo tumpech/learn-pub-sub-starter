@@ -30,7 +30,7 @@ func main() {
 
 	pubsub.DeclareAndBind(
 		rabbitmqConnection,
-		"peril_direct",
+		routing.ExchangePerilDirect,
 		queueName,
 		routing.PauseKey,
 		pubsub.TransientQueue,
