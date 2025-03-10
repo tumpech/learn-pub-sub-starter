@@ -26,15 +26,10 @@ func main() {
 		log.Fatalf("Error connecting to RabbitMQ: %v", err)
 	}
 
-	queueName := fmt.Sprintf("%s.%s", routing.PauseKey, username)
-
-	pubsub.DeclareAndBind(
-		rabbitmqConnection,
-		routing.ExchangePerilDirect,
-		queueName,
-		routing.PauseKey,
-		pubsub.TransientQueue,
-	)
+	rabbitmqChannel, err := rabbitmqConnection.Channel()
+	if err != nil {
+		log.Fatalf("Error creating channel in RabbitMQ: %v", err)
+	}
 
 	fmt.Println("Starting Peril client...")
 	sigChan := make(chan os.Signal, 1)
@@ -50,10 +45,23 @@ func main() {
 	err = pubsub.SubscribeJSON(
 		rabbitmqConnection,
 		routing.ExchangePerilDirect,
-		queueName,
+		fmt.Sprintf("%s.%s", routing.PauseKey, username),
 		routing.PauseKey,
 		pubsub.TransientQueue,
 		handlerPause(gamestate),
+	)
+
+	if err != nil {
+		log.Fatalf("Error subscribing to queue: %v", err)
+	}
+
+	err = pubsub.SubscribeJSON(
+		rabbitmqConnection,
+		routing.ExchangePerilTopic,
+		fmt.Sprintf("%s.%s", routing.ArmyMovesPrefix, username),
+		fmt.Sprintf("%s.*", routing.ArmyMovesPrefix),
+		pubsub.TransientQueue,
+		handlerMove(gamestate),
 	)
 
 	if err != nil {
@@ -75,10 +83,19 @@ func main() {
 			}
 			continue
 		case "move":
-			_, err := gamestate.CommandMove(input)
+			move, err := gamestate.CommandMove(input)
 			if err != nil {
 				log.Printf("Error while executing command: %v", err)
 				continue
+			}
+			err = pubsub.PublishJSON(
+				rabbitmqChannel,
+				routing.ExchangePerilTopic,
+				fmt.Sprintf("%s.%s", routing.ArmyMovesPrefix, username),
+				move,
+			)
+			if err != nil {
+				log.Fatalf("Couldn't publish JSON: %v", err)
 			}
 			log.Printf("Moved successfully.")
 			continue
