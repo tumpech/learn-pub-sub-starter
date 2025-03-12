@@ -61,7 +61,20 @@ func main() {
 		fmt.Sprintf("%s.%s", routing.ArmyMovesPrefix, username),
 		fmt.Sprintf("%s.*", routing.ArmyMovesPrefix),
 		pubsub.SimpleQueueTransient,
-		handlerMove(gamestate),
+		handlerMove(rabbitmqChannel, gamestate),
+	)
+
+	if err != nil {
+		log.Fatalf("Error subscribing to queue: %v", err)
+	}
+
+	err = pubsub.SubscribeJSON(
+		rabbitmqConnection,
+		routing.ExchangePerilTopic,
+		routing.WarRecognitionsPrefix,
+		fmt.Sprintf("%s.*", routing.WarRecognitionsPrefix),
+		pubsub.SimpleQueueDurable,
+		handlerWar(gamestate),
 	)
 
 	if err != nil {

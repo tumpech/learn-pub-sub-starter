@@ -36,12 +36,15 @@ func SubscribeJSON[T any](
 			case Ack:
 				delivery.Ack(false)
 				fmt.Println("Ack")
+				fmt.Print("> ")
 			case NackDiscard:
 				delivery.Nack(false, false)
 				fmt.Println("NackDiscard")
+				fmt.Print("> ")
 			case NackRequeue:
 				delivery.Nack(false, true)
 				fmt.Println("NackRequeue")
+				fmt.Print("> ")
 			}
 		}
 	}()
