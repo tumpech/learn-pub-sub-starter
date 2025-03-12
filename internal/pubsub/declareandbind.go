@@ -17,6 +17,9 @@ func DeclareAndBind(
 	}
 
 	var rabbitmqQueue amqp.Queue
+	table := amqp.Table{
+		"x-dead-letter-exchange": "peril_dlx",
+	}
 
 	if simpleQueueType == SimpleQueueDurable {
 		rabbitmqQueue, err = rabbitmqChannel.QueueDeclare(
@@ -25,7 +28,7 @@ func DeclareAndBind(
 			false,
 			false,
 			false,
-			nil,
+			table,
 		)
 	} else {
 		rabbitmqQueue, err = rabbitmqChannel.QueueDeclare(
@@ -34,7 +37,7 @@ func DeclareAndBind(
 			true,
 			true,
 			false,
-			nil,
+			table,
 		)
 	}
 
