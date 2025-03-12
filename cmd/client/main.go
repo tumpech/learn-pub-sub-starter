@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 
 	"github.com/bootdotdev/learn-pub-sub-starter/internal/gamelogic"
@@ -116,7 +117,28 @@ func main() {
 			gamestate.CommandStatus()
 			continue
 		case "spam":
-			log.Printf("Spamming not allowed yet!")
+			if len(input) < 2 {
+				log.Printf("usage spam <number_of_messages>")
+			}
+			n, err := strconv.Atoi(input[1])
+			if err != nil {
+				log.Printf("error: %v is not a number", input[1])
+			}
+			for i := range n {
+				log.Printf("Sending spam message %v.", i+1)
+
+				maliciousLog := gamelogic.GetMaliciousLog()
+				err = pubsub.PublishGob(
+					rabbitmqChannel,
+					routing.ExchangePerilTopic,
+					fmt.Sprintf("%s.%s", routing.GameLogSlug, username),
+					maliciousLog,
+				)
+				if err != nil {
+					log.Printf("error publishing spam: %v", err)
+				}
+
+			}
 			continue
 		case "quit":
 			gamelogic.PrintQuit()
