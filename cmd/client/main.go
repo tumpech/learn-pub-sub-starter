@@ -74,7 +74,7 @@ func main() {
 		routing.WarRecognitionsPrefix,
 		fmt.Sprintf("%s.*", routing.WarRecognitionsPrefix),
 		pubsub.SimpleQueueDurable,
-		handlerWar(gamestate),
+		handlerWar(rabbitmqChannel, gamestate),
 	)
 
 	if err != nil {
